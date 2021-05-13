@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{B3DB2C30-096B-45DD-BA7F-6FF842241DAF}"
 	ProjectSection(SolutionItems) = preProject
 		..\.github\workflows\dotnet.yml = ..\.github\workflows\dotnet.yml
+		..\sonar-project.properties = ..\sonar-project.properties
 	EndProjectSection
 EndProject
 Global
