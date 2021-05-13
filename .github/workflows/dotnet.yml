@@ -18,8 +18,8 @@ jobs:
       with:
         dotnet-version: 5.0.x
     - name: Restore dependencies
-      run: dotnet restore src\ZBugar75.PlayersWallet.sln
+      run: dotnet restore src/ZBugar75.PlayersWallet.sln
     - name: Build
-      run: dotnet build --no-restore src\ZBugar75.PlayersWallet\ZBugar75.PlayersWallet.Api.csproj
+      run: dotnet build --no-restore src/ZBugar75.PlayersWallet/ZBugar75.PlayersWallet.Api.csproj
 #    - name: Test
 #      run: dotnet test --no-build --verbosity normal
