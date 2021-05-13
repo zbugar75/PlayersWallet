@@ -8,16 +8,16 @@ namespace Zbugar75.PlayersWallet.Api.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class WeatherForecastController : ControllerBase
+    public class PlayerController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
         {
             "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
         };
 
-        private readonly ILogger<WeatherForecastController> _logger;
+        private readonly ILogger<PlayerController> _logger;
 
-        public WeatherForecastController(ILogger<WeatherForecastController> logger)
+        public PlayerController(ILogger<PlayerController> logger)
         {
             _logger = logger;
         }
