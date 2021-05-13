@@ -41,7 +41,7 @@ namespace Zbugar75.PlayersWallet.Api
 
             app.UseRouting();
 
-            app.UseAuthorization();
+            //app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
