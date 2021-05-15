@@ -18,17 +18,23 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Repositories.Implementations
         {
         }
 
-        public async Task CreatePlayerAsync(Player player, CancellationToken cancellationToken)
+        public async Task<Player> CreatePlayerAsync(string username, CancellationToken cancellationToken)
         {
             using (await padlock.WriterLockAsync(cancellationToken).ConfigureAwait(false))
             {
-                if (await Context.Players.FirstOrDefaultAsync(p => p.Username == player.Username, cancellationToken).ConfigureAwait(false) != null)
-                    throw new DuplicateUsernameException($"Duplicate exception. Username '{player.Username}' already exists.");
+                if (await Context.Players.FirstOrDefaultAsync(p => p.Username == username, cancellationToken).ConfigureAwait(false) != null)
+                    throw new DuplicateUsernameException($"Duplicate exception. Username '{username}' already exists.");
 
-                player.Wallet = new Wallet(0);
+                var player = new Player
+                {
+                    Username = username,
+                    Wallet = new Wallet(0)
+                };
 
                 await AddAsync(player, cancellationToken).ConfigureAwait(false);
                 await Context.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+                return player;
             }
         }
 
