@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Zbugar75.PlayersWallet.Api.Domain.Entities;
 
-namespace Zbugar75.PlayersWallet.Api.Infrastructure
+namespace Zbugar75.PlayersWallet.Api.Infrastructure.DbContext
 {
     public interface IPlayersWalletContext
     {

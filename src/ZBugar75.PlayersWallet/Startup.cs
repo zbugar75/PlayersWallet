@@ -5,7 +5,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Zbugar75.PlayersWallet.Api.Infrastructure;
+using Zbugar75.PlayersWallet.Api.Infrastructure.DbContext;
 
 namespace Zbugar75.PlayersWallet.Api
 {

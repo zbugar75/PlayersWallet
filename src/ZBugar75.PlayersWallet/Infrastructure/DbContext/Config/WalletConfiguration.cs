@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Zbugar75.PlayersWallet.Api.Domain.Entities;
 
-namespace Zbugar75.PlayersWallet.Api.Infrastructure.Config
+namespace Zbugar75.PlayersWallet.Api.Infrastructure.DbContext.Config
 {
     public class WalletConfiguration : IEntityTypeConfiguration<Wallet>
     {

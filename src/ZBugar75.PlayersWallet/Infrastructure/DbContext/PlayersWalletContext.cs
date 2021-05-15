@@ -1,9 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Zbugar75.PlayersWallet.Api.Domain.Entities;
 
-namespace Zbugar75.PlayersWallet.Api.Infrastructure
+namespace Zbugar75.PlayersWallet.Api.Infrastructure.DbContext
 {
-    public class PlayersWalletContext : DbContext, IPlayersWalletContext
+    public class PlayersWalletContext : Microsoft.EntityFrameworkCore.DbContext, IPlayersWalletContext
     {
         public PlayersWalletContext(DbContextOptions<PlayersWalletContext> options) : base(options)
         {
