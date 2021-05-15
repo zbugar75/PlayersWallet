@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\ZBugar75.PlayersWallet\ZBugar75.PlayersWallet.Api.csproj" />
+    <ProjectReference Include="..\ZBugar75.PlayersWallet.Api\ZBugar75.PlayersWallet.Api.csproj" />
   </ItemGroup>
 
 </Project>
