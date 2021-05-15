@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Zbugar75.PlayersWallet.Api.Infrastructure.DbContext;
+using Zbugar75.PlayersWallet.Api.Utils;
 
 namespace Zbugar75.PlayersWallet.Api
 {
@@ -23,7 +24,10 @@ namespace Zbugar75.PlayersWallet.Api
             services.AddDbContext<IPlayersWalletContext, PlayersWalletContext>(
                 options => options.UseInMemoryDatabase(databaseName: "InMemoryDb"));
 
-            services.AddControllers();
+            services
+                .RegisterRepositories()
+                .AddControllers();
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "PlayersWallet", Version = "v1" });
