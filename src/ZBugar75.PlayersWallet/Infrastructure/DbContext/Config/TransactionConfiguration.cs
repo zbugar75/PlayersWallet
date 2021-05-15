@@ -11,8 +11,9 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.DbContext.Config
             builder.HasKey(item => item.Id);
 
             builder.HasOne<Player>()
-                .WithOne(x => x.Transaction)
-                .HasForeignKey<Transaction>(x => x.PlayerId);
+                .WithMany(x => x.Transactions)
+                .HasForeignKey(x => x.PlayerId)
+                .IsRequired();
 
             builder
                 .Property(item => item.TransactionType)

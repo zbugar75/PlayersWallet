@@ -20,6 +20,9 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Repositories.Implementations
 
         public async Task<Player> CreatePlayerAsync(string username, CancellationToken cancellationToken)
         {
+            if (username is null)
+                throw new ArgumentNullException("username");
+
             using (await padlock.WriterLockAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (await Context.Players.FirstOrDefaultAsync(p => p.Username == username, cancellationToken).ConfigureAwait(false) != null)
