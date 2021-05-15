@@ -6,7 +6,11 @@ namespace Zbugar75.PlayersWallet.Api.Domain.Entities
     {
         public Wallet()
         {
-            Balance = 0;
+        }
+
+        public Wallet(decimal balance)
+        {
+            Balance = balance;
         }
 
         public Guid PlayerId { get; set; }
