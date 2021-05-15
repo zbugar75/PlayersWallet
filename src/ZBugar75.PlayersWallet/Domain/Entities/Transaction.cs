@@ -11,6 +11,6 @@ namespace Zbugar75.PlayersWallet.Api.Domain.Entities
 
         public decimal Amount { get; set; }
 
-        public TransactionResponseCache TransactionResponseCache { get; set; }
+        public TransactionResponse TransactionResponse { get; set; }
     }
 }

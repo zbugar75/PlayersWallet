@@ -4,15 +4,15 @@ using Zbugar75.PlayersWallet.Api.Domain.Entities;
 
 namespace Zbugar75.PlayersWallet.Api.Infrastructure.DbContext.Config
 {
-    public class TransactionResponseCacheConfiguration : IEntityTypeConfiguration<TransactionResponseCache>
+    public class TransactionResponseConfiguration : IEntityTypeConfiguration<TransactionResponse>
     {
-        public void Configure(EntityTypeBuilder<TransactionResponseCache> builder)
+        public void Configure(EntityTypeBuilder<TransactionResponse> builder)
         {
             builder.HasKey(item => item.TransactionId);
 
             builder.HasOne<Transaction>()
-                .WithOne(x => x.TransactionResponseCache)
-                .HasForeignKey<TransactionResponseCache>(x => x.TransactionId);
+                .WithOne(x => x.TransactionResponse)
+                .HasForeignKey<TransactionResponse>(x => x.TransactionId);
 
             builder
                 .Property(item => item.ResponseStatusCode)

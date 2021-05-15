@@ -11,6 +11,6 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.DbContext
 
         DbSet<Transaction> Transactions { get; }
 
-        DbSet<TransactionResponseCache> TransactionResponseCaches { get; }
+        DbSet<TransactionResponse> TransactionResponseCaches { get; }
     }
 }

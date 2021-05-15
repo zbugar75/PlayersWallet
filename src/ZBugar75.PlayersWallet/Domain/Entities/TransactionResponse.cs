@@ -2,7 +2,7 @@
 
 namespace Zbugar75.PlayersWallet.Api.Domain.Entities
 {
-    public class TransactionResponseCache
+    public class TransactionResponse
     {
         public Guid TransactionId { get; set; }
 
