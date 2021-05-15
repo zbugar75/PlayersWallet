@@ -1,4 +1,6 @@
-﻿namespace Zbugar75.PlayersWallet.Api.Domain.Entities
+﻿using System.Collections.Generic;
+
+namespace Zbugar75.PlayersWallet.Api.Domain.Entities
 {
     public class Player : EntityBase
     {
@@ -6,6 +8,6 @@
 
         public Wallet Wallet { get; set; }
 
-        public Transaction Transaction { get; set; }
+        public ICollection<Transaction> Transactions { get; set; }
     }
 }
