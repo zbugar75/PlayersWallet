@@ -29,4 +29,4 @@ jobs:
     - name: Build
       run: dotnet build --no-restore src/ZBugar75.PlayersWallet.sln
     - name: Test
-      run: dotnet test --no-build --verbosity  normal --logger trx --results-directory "TestResults/" --collect:"XPlat Code Coverage" src/ZBugar75.PlayersWallet.sln
+      run: dotnet test --no-build --verbosity  normal --logger trx --collect:"XPlat Code Coverage" src/ZBugar75.PlayersWallet.sln
