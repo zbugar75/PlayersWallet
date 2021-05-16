@@ -27,6 +27,6 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore src/ZBugar75.PlayersWallet.sln
     - name: Build
-      run: dotnet build --no-restore src/ZBugar75.PlayersWallet/ZBugar75.PlayersWallet.Api.csproj
-#    - name: Test
-#      run: dotnet test --no-build --verbosity normal
+      run: dotnet build --no-restore src/ZBugar75.PlayersWallet.sln
+    - name: Test
+      run: dotnet test --no-build --verbosity normal src/ZBugar75.PlayersWallet.sln  /p:CollectCoverage=true /p:CoverletOutput=TestResults/ /p:CoverletOutputFormat=lcov
