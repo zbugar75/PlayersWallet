@@ -46,9 +46,9 @@ namespace Zbugar75.PlayersWallet.Api.Controllers
         [HttpPost]
         [ProducesResponseType(typeof(IEnumerable<PlayerDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status409Conflict)]
-        public async Task<PlayerDto> CreatePlayer(string username, CancellationToken cancellationToken)
+        public async Task<PlayerDto> CreatePlayer([FromBody] CreatePlayerRequest request, CancellationToken cancellationToken)
         {
-            var player = await _playerRepository.CreatePlayerAsync(username, cancellationToken).ConfigureAwait(false);
+            var player = await _playerRepository.CreatePlayerAsync(request.Username, cancellationToken).ConfigureAwait(false);
             return PlayerDto.Create(player);
         }
     }
