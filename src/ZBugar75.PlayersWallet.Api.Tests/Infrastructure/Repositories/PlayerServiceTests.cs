@@ -125,5 +125,48 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Infrastructure.Repositories
 
             result.Balance.Should().Be(balance);
         }
+
+        [Fact]
+        public async Task GetTransactionsAsync_ShouldThrowEntityNotFoundException_WhenCalledNotExistingPlayer()
+        {
+            var playerId = 999.ToGuid();
+
+            Func<Task> act = async () => { await _underTest.GetTransactionsAsync(playerId, _cancellationToken); };
+
+            await act.Should().ThrowAsync<EntityNotFoundException>();
+        }
+
+        [Fact]
+        public async Task GetTransactionsAsync_ShouldReturnAnEmptyArray_WhenPlayerExistsWithoutTransaction()
+        {
+            var playerId = 1.ToGuid();
+
+            _ = await new PlayerBuilder()
+                .WithId(playerId)
+                .CreateAsync(_playersWalletContext, _cancellationToken);
+
+            var result = await _underTest.GetTransactionsAsync(playerId, _cancellationToken);
+
+            result.Count().Should().Be(0);
+        }
+
+        [Fact]
+        public async Task GetTransactionsAsync_ShouldReturnAnArrayOfTransactions_WhenPlayerExists()
+        {
+            var playerId = 1.ToGuid();
+
+            _ = await new PlayerBuilder()
+                .WithId(playerId)
+                .CreateAsync(_playersWalletContext, _cancellationToken);
+
+            var transaction = await new TransactionBuilder()
+                .WithPalyerId(playerId)
+                .CreateAsync(_playersWalletContext, _cancellationToken);
+
+            var result = await _underTest.GetTransactionsAsync(playerId, _cancellationToken);
+
+            result.Count().Should().Be(1);
+            result.Select(p => p.Id).Should().Equal(transaction.Id);
+        }
     }
 }
