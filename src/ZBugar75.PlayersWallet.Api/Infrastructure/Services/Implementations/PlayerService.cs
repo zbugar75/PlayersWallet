@@ -15,12 +15,14 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
         private readonly IUnitOfWork _unitOfWork;
         private readonly IPlayerRepository _players;
         private readonly IWalletRepository _wallets;
+        private readonly ITransactionRepository _transactions;
 
         public PlayerService(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
             _players = unitOfWork.Players;
             _wallets = unitOfWork.Wallets;
+            _transactions = _unitOfWork.Transactions;
         }
 
         public async Task<Player> CreatePlayerAsync(string username, CancellationToken cancellationToken)
@@ -44,21 +46,34 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
             return player;
         }
 
-        public async Task<decimal> GetBalanceAsync(Guid playerId, CancellationToken cancellationToken)
+        public async Task<Wallet> GetBalanceAsync(Guid playerId, CancellationToken cancellationToken)
         {
+            await EnsurePlayerExistsAsync(playerId, cancellationToken).ConfigureAwait(false);
+
             var wallet = await _wallets.GetAsync(playerId, cancellationToken).ConfigureAwait(false);
 
             if (wallet == null)
                 throw new EntityNotFoundException($"Entity not found exception. Wallet for player {playerId} not found.");
 
-            var walletBalance = wallet.Balance;
-
-            return walletBalance;
+            return wallet;
         }
 
         public async Task<IEnumerable<Player>> GetPlayersAsync(CancellationToken cancellationToken)
         {
             return await _players.GetAllAsync(cancellationToken).ConfigureAwait(false);
+        }
+
+        public async Task<IEnumerable<Transaction>> GetTransactionsAsync(Guid playerId, CancellationToken cancellationToken)
+        {
+            await EnsurePlayerExistsAsync(playerId, cancellationToken).ConfigureAwait(false);
+
+            return await _transactions.GetAllForPlayerAsync(playerId, cancellationToken).ConfigureAwait(false);
+        }
+
+        private async Task EnsurePlayerExistsAsync(Guid playerId, CancellationToken cancellationToken)
+        {
+            if (!await _players.ExistsPlayerWithPlayerIdAsync(playerId, cancellationToken).ConfigureAwait(false))
+                throw new EntityNotFoundException($"Entity not found exception. Player {playerId} not found.");
         }
     }
 }

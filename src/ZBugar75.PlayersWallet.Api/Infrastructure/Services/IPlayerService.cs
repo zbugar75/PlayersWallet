@@ -10,8 +10,10 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services
     {
         Task<Player> CreatePlayerAsync(string username, CancellationToken cancellationToken);
 
-        Task<decimal> GetBalanceAsync(Guid playerId, CancellationToken cancellationToken);
+        Task<Wallet> GetBalanceAsync(Guid playerId, CancellationToken cancellationToken);
 
         Task<IEnumerable<Player>> GetPlayersAsync(CancellationToken cancellationToken);
+
+        Task<IEnumerable<Transaction>> GetTransactionsAsync(Guid playerId, CancellationToken cancellationToken);
     }
 }

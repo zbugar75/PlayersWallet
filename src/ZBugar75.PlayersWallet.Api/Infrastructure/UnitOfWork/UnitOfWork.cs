@@ -17,7 +17,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.UnitOfWork
             _context = context;
             Players = new PlayerRepository(_context);
             Wallets = new WalletRepository(_context);
-            //Transactions = new TransactionRepository(_context);
+            Transactions = new TransactionRepository(_context);
         }
 
         public IPlayerRepository Players { get; private set; }

@@ -38,11 +38,13 @@ namespace Zbugar75.PlayersWallet.Api.Controllers
             return PlayerBalanceDto.Create(wallet);
         }
 
+        [HttpGet("{id}/transactions")]
+        [ProducesResponseType(typeof(IEnumerable<TransactionDto>), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status404NotFound)]
-        public async Task<decimal> GetBalance(Guid id, CancellationToken cancellationToken)
+        public async Task<IEnumerable<TransactionDto>> Get(Guid id, CancellationToken cancellationToken)
         {
-            var balance = await _playerService.GetBalanceAsync(id, cancellationToken).ConfigureAwait(false);
-            return balance;
+            var transactions = await _playerService.GetTransactionsAsync(id, cancellationToken).ConfigureAwait(false);
+            return transactions.Select(TransactionDto.Create);
         }
 
         [HttpPost]

@@ -1,4 +1,5 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Zbugar75.PlayersWallet.Api.Domain.Entities;
@@ -15,6 +16,11 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Repositories.Implementations
         public async Task<bool> ExistsPlayerWithUsernameAsync(string username, CancellationToken cancellationToken)
         {
             return await Context.Players.FirstOrDefaultAsync(p => p.Username == username, cancellationToken).ConfigureAwait(false) != null;
+        }
+
+        public async Task<bool> ExistsPlayerWithPlayerIdAsync(Guid playerId, CancellationToken cancellationToken)
+        {
+            return await Context.Players.FirstOrDefaultAsync(p => p.Id == playerId, cancellationToken).ConfigureAwait(false) != null;
         }
     }
 }
