@@ -30,7 +30,14 @@ namespace Zbugar75.PlayersWallet.Api.Controllers
         }
 
         [HttpGet("{id}/balance")]
-        [ProducesResponseType(typeof(IEnumerable<PlayerDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PlayerBalanceDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status404NotFound)]
+        public async Task<PlayerBalanceDto> GetBalance(Guid id, CancellationToken cancellationToken)
+        {
+            var wallet = await _playerService.GetBalanceAsync(id, cancellationToken).ConfigureAwait(false);
+            return PlayerBalanceDto.Create(wallet);
+        }
+
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status404NotFound)]
         public async Task<decimal> GetBalance(Guid id, CancellationToken cancellationToken)
         {
@@ -39,7 +46,7 @@ namespace Zbugar75.PlayersWallet.Api.Controllers
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(IEnumerable<PlayerDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PlayerDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status409Conflict)]
         public async Task<PlayerDto> CreatePlayer([FromBody] CreatePlayerRequest request, CancellationToken cancellationToken)
         {
