@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using Zbugar75.PlayersWallet.Api.Infrastructure.DbContext;
 using Zbugar75.PlayersWallet.Api.Utils;
+using Zbugar75.PlayersWallet.Api.Utils.Extensions;
 
 namespace Zbugar75.PlayersWallet.Api
 {
@@ -42,6 +43,7 @@ namespace Zbugar75.PlayersWallet.Api
                 app.UseSwagger();
                 app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "PlayersWallet v1"));
             }
+            app.UseErrorLoggingMiddleware();
 
             app.UseHttpsRedirection();
 
