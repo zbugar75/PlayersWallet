@@ -15,7 +15,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.DbContext
 
         public DbSet<Transaction> Transactions { get; set; }
 
-        public DbSet<TransactionResponse> TransactionResponseCaches { get; set; }
+        public DbSet<TransactionResponse> TransactionResponseCache { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

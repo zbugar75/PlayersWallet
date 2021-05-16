@@ -26,5 +26,10 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Shared
         {
             return (c1, c2) => c1.Id == c2.Id && c1.Username == c2.Username;
         }
+
+        public static Func<TransactionResponse, TransactionResponse, bool> CompareTransactionResponseListsFunc()
+        {
+            return (c1, c2) => c1.TransactionId == c2.TransactionId && c1.ResponseStatusCode == c2.ResponseStatusCode;
+        }
     }
 }

@@ -14,7 +14,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.DbContext
 
         DbSet<Transaction> Transactions { get; }
 
-        DbSet<TransactionResponse> TransactionResponseCaches { get; }
+        DbSet<TransactionResponse> TransactionResponseCache { get; }
 
         DbSet<TEntity> Set<TEntity>() where TEntity : class;
 
