@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Zbugar75.PlayersWallet.Api.Dtos;
-using Zbugar75.PlayersWallet.Api.Infrastructure.Repositories;
+using Zbugar75.PlayersWallet.Api.Infrastructure.Services;
 
 namespace Zbugar75.PlayersWallet.Api.Controllers
 {
@@ -14,20 +14,18 @@ namespace Zbugar75.PlayersWallet.Api.Controllers
     [Route("[controller]")]
     public class PlayersController : ControllerBase
     {
-        private readonly IPlayerRepository _playerRepository;
-        private readonly IWalletRepository _walletRepository;
+        private readonly IPlayerService _playerService;
 
-        public PlayersController(IPlayerRepository playerRepository, IWalletRepository walletRepository)
+        public PlayersController(IPlayerService playerService)
         {
-            _playerRepository = playerRepository;
-            _walletRepository = walletRepository;
+            _playerService = playerService;
         }
 
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<PlayerDto>), StatusCodes.Status200OK)]
         public async Task<IEnumerable<PlayerDto>> GetPlayers(CancellationToken cancellationToken)
         {
-            var players = await _playerRepository.GetPlayersAsync(cancellationToken).ConfigureAwait(false);
+            var players = await _playerService.GetPlayersAsync(cancellationToken).ConfigureAwait(false);
             return players.Select(PlayerDto.Create);
         }
 
@@ -36,7 +34,7 @@ namespace Zbugar75.PlayersWallet.Api.Controllers
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status404NotFound)]
         public async Task<decimal> GetBalance(Guid id, CancellationToken cancellationToken)
         {
-            var balance = await _walletRepository.GetBalanceAsync(id, cancellationToken).ConfigureAwait(false);
+            var balance = await _playerService.GetBalanceAsync(id, cancellationToken).ConfigureAwait(false);
             return balance;
         }
 
@@ -45,7 +43,7 @@ namespace Zbugar75.PlayersWallet.Api.Controllers
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status409Conflict)]
         public async Task<PlayerDto> CreatePlayer([FromBody] CreatePlayerRequest request, CancellationToken cancellationToken)
         {
-            var player = await _playerRepository.CreatePlayerAsync(request.Username, cancellationToken).ConfigureAwait(false);
+            var player = await _playerService.CreatePlayerAsync(request.Username, cancellationToken).ConfigureAwait(false);
             return PlayerDto.Create(player);
         }
     }

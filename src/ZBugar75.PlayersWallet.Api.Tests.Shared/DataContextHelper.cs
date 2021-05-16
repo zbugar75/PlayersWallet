@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Zbugar75.PlayersWallet.Api.Domain.Entities;
 using Zbugar75.PlayersWallet.Api.Dtos;
 using Zbugar75.PlayersWallet.Api.Infrastructure.DbContext;
+using Zbugar75.PlayersWallet.Api.Infrastructure.UnitOfWork;
 
 namespace ZBugar75.PlayersWallet.Api.Tests.Shared
 {
@@ -15,6 +16,10 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Shared
                 .EnableServiceProviderCaching(false)
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString(), new InMemoryDatabaseRoot())
                 .Options);
+        }
+        public static IUnitOfWork GetUnitOfWork(IPlayersWalletContext context)
+        {
+            return new UnitOfWork(context);
         }
 
         public static Func<Player, Player, bool> ComparePlayersListsFunc()
