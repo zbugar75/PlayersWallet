@@ -2,7 +2,7 @@
 
 namespace Zbugar75.PlayersWallet.Api.Infrastructure.Repositories
 {
-    public interface ITransactionResponseCacheRepository : IRepository<TransactionResponse>
+    public interface ITransactionRepository : IRepository<Transaction>
     {
     }
 }

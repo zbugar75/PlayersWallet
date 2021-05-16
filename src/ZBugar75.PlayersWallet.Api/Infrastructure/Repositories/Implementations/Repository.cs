@@ -8,7 +8,7 @@ using Zbugar75.PlayersWallet.Api.Infrastructure.DbContext;
 
 namespace Zbugar75.PlayersWallet.Api.Infrastructure.Repositories.Implementations
 {
-    public class Repository<TEntity> where TEntity : class
+    public class Repository<TEntity> : IRepository<TEntity> where TEntity : class
     {
         protected readonly IPlayersWalletContext Context;
 
@@ -17,7 +17,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Repositories.Implementations
             Context = context;
         }
 
-        protected async Task<TEntity> GetAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<TEntity> GetAsync(Guid id, CancellationToken cancellationToken)
         {
             var findEntityAsync = await Context.Set<TEntity>().FindAsync(new object[] { id }, cancellationToken).ConfigureAwait(false);
             if (findEntityAsync == null)
@@ -26,14 +26,15 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Repositories.Implementations
             return findEntityAsync;
         }
 
-        protected Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken)
+        public Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken)
         {
             return Context.Set<TEntity>().ToListAsync(cancellationToken);
         }
 
-        protected async Task AddAsync(TEntity entity, CancellationToken cancellationToken)
+        public async Task<TEntity> AddAsync(TEntity entity, CancellationToken cancellationToken)
         {
             await Context.Set<TEntity>().AddAsync(entity, cancellationToken).ConfigureAwait(false);
+            return entity;
         }
     }
 }
