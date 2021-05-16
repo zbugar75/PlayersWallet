@@ -60,6 +60,16 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Infrastructure.Repositories
         }
 
         [Fact]
+        public async Task CreatePlayerAsync_ShouldThrowArgumentNullException_WhenCalledWithEmptyString()
+        {
+            var username = string.Empty;
+
+            Func<Task> act = async () => { await _underTest.CreatePlayerAsync(username, _cancellationToken); };
+
+            await act.Should().ThrowAsync<ArgumentNullException>();
+        }
+
+        [Fact]
         public async Task CreatePlayerAsync_ShouldCreatePlayer_WhenCalledWithNewPlayerName()
         {
             var username = "username";
