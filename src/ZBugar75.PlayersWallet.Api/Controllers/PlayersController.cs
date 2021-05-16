@@ -5,7 +5,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Zbugar75.PlayersWallet.Api.Dtos;
 using Zbugar75.PlayersWallet.Api.Infrastructure.Repositories;
 
@@ -15,13 +14,11 @@ namespace Zbugar75.PlayersWallet.Api.Controllers
     [Route("[controller]")]
     public class PlayersController : ControllerBase
     {
-        private readonly ILogger<PlayersController> _logger;
         private readonly IPlayerRepository _playerRepository;
         private readonly IWalletRepository _walletRepository;
 
-        public PlayersController(ILogger<PlayersController> logger, IPlayerRepository playerRepository, IWalletRepository walletRepository)
+        public PlayersController(IPlayerRepository playerRepository, IWalletRepository walletRepository)
         {
-            _logger = logger;
             _playerRepository = playerRepository;
             _walletRepository = walletRepository;
         }

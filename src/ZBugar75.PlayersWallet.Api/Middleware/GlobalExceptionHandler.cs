@@ -42,10 +42,10 @@ namespace Zbugar75.PlayersWallet.Api.Middleware
             _logger.LogError(exception, $"Global exception handler catched exception.");
             var response = context.Response;
             response.ContentType = "application/json";
-            response.StatusCode = this.GetStatusCodeFromException(exception);
+            response.StatusCode = GetStatusCodeFromException(exception);
         }
 
-        private int GetStatusCodeFromException(Exception ex)
+        private static int GetStatusCodeFromException(Exception ex)
         {
             HttpStatusCode code = HttpStatusCode.InternalServerError;
             if (ex != null)
