@@ -15,5 +15,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services
         Task<IEnumerable<Player>> GetPlayersAsync(CancellationToken cancellationToken);
 
         Task<IEnumerable<Transaction>> GetTransactionsAsync(Guid playerId, CancellationToken cancellationToken);
+
+        Task<TransactionResponse> RegisterTransactionAsync(Transaction transaction, CancellationToken cancellationToken);
     }
 }

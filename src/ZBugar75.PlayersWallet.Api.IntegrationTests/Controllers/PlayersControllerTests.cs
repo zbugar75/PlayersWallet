@@ -7,8 +7,10 @@ using Newtonsoft.Json;
 using Xunit;
 using Zbugar75.PlayersWallet.Api;
 using Zbugar75.PlayersWallet.Api.Dtos;
+using Zbugar75.PlayersWallet.Api.Dtos.Enums;
 using ZBugar75.PlayersWallet.Api.IntegrationTests.Helper;
 using ZBugar75.PlayersWallet.Api.Tests.Shared;
+using ZBugar75.PlayersWallet.Api.Tests.Shared.Builder;
 using ZBugar75.PlayersWallet.Api.Tests.Shared.Extensions;
 
 namespace ZBugar75.PlayersWallet.Api.IntegrationTests.Controllers
@@ -130,6 +132,50 @@ namespace ZBugar75.PlayersWallet.Api.IntegrationTests.Controllers
             transactionsResponse.Should().Equal(
                 Utilities.GetSeedingTransactions().Where(t => t.PlayerId == player.Id),
                 DataContextHelper.CompareTransactionDtoToTransaction());
+        }
+
+        [Fact]
+        public async Task RegisterTransaction_ShouldReturn404NotFound_WhenPlayerNotExists()
+        {
+            var client = _factory.CreateClient();
+            var body = new RegisterTransactionRequestBuilder().Build();
+            var playerId = 999.ToGuid();
+
+            var response = await client.PostAsync($"/players/{playerId}/registertransaction", ContentHelper.GetStringContent(body));
+
+            response.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+
+        [Fact]
+        public async Task RegisterTransaction_ShouldReturn403Forbidden_WhenPlayerBalanceIsLow()
+        {
+            var client = _factory.CreateClient();
+            var body = new RegisterTransactionRequestBuilder()
+                .WithTransactionType(TransactionTypeDto.Stake)
+                .WithAmount(100000)
+                .Build();
+
+            var player = Utilities.GetSeedingPlayers()[0];
+
+            var response = await client.PostAsync($"/players/{player.Id}/registertransaction", ContentHelper.GetStringContent(body));
+
+            response.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
+        }
+
+        [Fact]
+        public async Task RegisterTransaction_ShouldReturn202Accepted_WhenTransactionExecuted()
+        {
+            var client = _factory.CreateClient();
+            var body = new RegisterTransactionRequestBuilder()
+                .WithTransactionType(TransactionTypeDto.Win)
+                .WithAmount(100000)
+                .Build();
+
+            var player = Utilities.GetSeedingPlayers()[0];
+
+            var response = await client.PostAsync($"/players/{player.Id}/registertransaction", ContentHelper.GetStringContent(body));
+
+            response.StatusCode.Should().Be(StatusCodes.Status202Accepted);
         }
     }
 }

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Zbugar75.PlayersWallet.Api.Dtos;
 using Zbugar75.PlayersWallet.Api.Infrastructure.Services;
+using Zbugar75.PlayersWallet.Api.Utils.Extensions;
 
 namespace Zbugar75.PlayersWallet.Api.Controllers
 {
@@ -54,6 +55,16 @@ namespace Zbugar75.PlayersWallet.Api.Controllers
         {
             var player = await _playerService.CreatePlayerAsync(request.Username, cancellationToken).ConfigureAwait(false);
             return PlayerDto.Create(player);
+        }
+
+        [HttpPost("{id}/registertransaction")]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status202Accepted)]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> RegisterTransaction(Guid id, [FromBody] RegisterTransactionRequest request, CancellationToken cancellationToken)
+        {
+            var transactionResponse = await _playerService.RegisterTransactionAsync(request.ToTransaction(id), cancellationToken).ConfigureAwait(false);
+            return StatusCode(transactionResponse.ResponseStatusCode);
         }
     }
 }

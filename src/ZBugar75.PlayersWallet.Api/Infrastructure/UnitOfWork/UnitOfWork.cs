@@ -9,6 +9,14 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.UnitOfWork
 {
     public class UnitOfWork : IUnitOfWork
     {
+        public IPlayerRepository Players { get; private set; }
+        
+        public IWalletRepository Wallets { get; private set; }
+        
+        public ITransactionRepository Transactions { get; private set; }
+
+        public ITransactionResponseCacheRepository TransactionResponseCache { get; private set; }
+
         private readonly IPlayersWalletContext _context;
         private bool _disposed = false;
 
@@ -18,12 +26,8 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.UnitOfWork
             Players = new PlayerRepository(_context);
             Wallets = new WalletRepository(_context);
             Transactions = new TransactionRepository(_context);
+            TransactionResponseCache= new TransactionResponseCacheRepository(_context);
         }
-
-        public IPlayerRepository Players { get; private set; }
-        public IWalletRepository Wallets { get; private set; }
-        public ITransactionRepository Transactions { get; private set; }
-
 
         public Task CommitAsync(CancellationToken cancellationToken)
         {

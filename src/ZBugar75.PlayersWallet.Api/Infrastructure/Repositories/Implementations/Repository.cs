@@ -17,13 +17,18 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Repositories.Implementations
             Context = context;
         }
 
-        public async Task<TEntity> GetAsync(Guid id, CancellationToken cancellationToken)
+        public async Task<TEntity> GetExistingAsync(Guid id, CancellationToken cancellationToken)
         {
             var findEntityAsync = await Context.Set<TEntity>().FindAsync(new object[] { id }, cancellationToken).ConfigureAwait(false);
             if (findEntityAsync == null)
                 throw new EntityNotFoundException($"{typeof(TEntity)} with Id {id} not found");
 
             return findEntityAsync;
+        }
+
+        public async Task<TEntity> GetAsync(Guid id, CancellationToken cancellationToken)
+        {
+            return await Context.Set<TEntity>().FindAsync(new object[] { id }, cancellationToken).ConfigureAwait(false);
         }
 
         public Task<List<TEntity>> GetAllAsync(CancellationToken cancellationToken)

@@ -13,6 +13,8 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.UnitOfWork
 
         ITransactionRepository Transactions { get; }
 
+        ITransactionResponseCacheRepository TransactionResponseCache { get; }
+
         Task CommitAsync(CancellationToken cancellationToken);
     }
 }

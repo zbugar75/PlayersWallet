@@ -15,16 +15,6 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Repositories.Implementations
         {
         }
 
-        //public async Task<Transaction> RegisterTransactionAsync(Transaction transaction, CancellationToken cancellationToken)
-        //{
-        //    using (await padlock.WriterLockAsync(cancellationToken).ConfigureAwait(false))
-        //    {
-        //        await AddAsync(transaction, cancellationToken).ConfigureAwait(false);
-
-        //        return transaction;
-        //    }
-        //}
-
         public async Task<IEnumerable<Transaction>> GetAllForPlayerAsync(Guid playerId, CancellationToken cancellationToken)
         {
             return await Context.Transactions
