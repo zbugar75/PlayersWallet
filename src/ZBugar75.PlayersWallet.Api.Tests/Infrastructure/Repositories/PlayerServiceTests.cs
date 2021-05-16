@@ -114,16 +114,16 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Infrastructure.Repositories
         public async Task GetBalanceAsync_ShouldReturnBalance_WhenCalledForExistingPlayer()
         {
             var playerId = 1.ToGuid();
-            var balance = 1000;
+            var balance = 1234.56M;
 
             _ = await new PlayerBuilder()
                 .WithId(playerId)
                 .WithBalance(balance)
                 .CreateAsync(_playersWalletContext, _cancellationToken);
 
-            var result = await _underTest.GetBalanceAsync(1.ToGuid(), _cancellationToken);
+            var result = await _underTest.GetBalanceAsync(playerId, _cancellationToken);
 
-            result.Should().Be(balance);
+            result.Balance.Should().Be(balance);
         }
     }
 }

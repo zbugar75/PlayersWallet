@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -45,11 +45,13 @@ namespace ZBugar75.PlayersWallet.Api.IntegrationTests.Controllers
             var wallet = Utilities.GetSeedingWallets()[0];
 
             var response = await client.GetAsync($"/players/{wallet.PlayerId}/balance");
-            var balance = await response.Content.ReadAsStringAsync();
+            var jsonFromResponse = await response.Content.ReadAsStringAsync();
+            var playerBalanceResponse = JsonConvert.DeserializeObject<PlayerBalanceDto>(jsonFromResponse);
 
             response.EnsureSuccessStatusCode();
 
-            balance.Should().Be(wallet.Balance.ToString(CultureInfo.InvariantCulture));
+            playerBalanceResponse.Balance.Should().Be(wallet.Balance);
+            playerBalanceResponse.PlayerId.Should().Be(wallet.PlayerId);
         }
 
         [Fact]
@@ -100,6 +102,34 @@ namespace ZBugar75.PlayersWallet.Api.IntegrationTests.Controllers
             response.EnsureSuccessStatusCode();
 
             playerResponse.Username.Should().Be(username);
+        }
+
+        [Fact]
+        public async Task GetTransactions_ShouldReturnStatus404NotFound_WhenCalledWithNotExistingPlayer()
+        {
+            var client = _factory.CreateClient();
+
+            var response = await client.GetAsync($"/players/{999.ToGuid()}/transactions");
+
+            response.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+
+        [Fact]
+        public async Task GetTransactions_ShouldReturnSeededTransactions_WhenCalledWithExistingPlayer()
+        {
+            var client = _factory.CreateClient();
+
+            var player = Utilities.GetSeedingPlayers()[0];
+
+            var response = await client.GetAsync($"/players/{player.Id}/transactions");
+            var jsonFromResponse = await response.Content.ReadAsStringAsync();
+            var transactionsResponse = JsonConvert.DeserializeObject<IEnumerable<TransactionDto>>(jsonFromResponse);
+
+            response.EnsureSuccessStatusCode();
+
+            transactionsResponse.Should().Equal(
+                Utilities.GetSeedingTransactions().Where(t => t.PlayerId == player.Id),
+                DataContextHelper.CompareTransactionDtoToTransaction());
         }
     }
 }
