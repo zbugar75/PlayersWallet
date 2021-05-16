@@ -49,5 +49,5 @@ jobs:
       shell: powershell
       run: |
         .\.sonar\scanner\dotnet-sonarscanner begin /k:"zbugar75_PlayersWallet" /o:"zbugar75" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-        dotnet build -src/ZBugar75.PlayersWallet.sln
+        dotnet build src/ZBugar75.PlayersWallet.sln
         .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
