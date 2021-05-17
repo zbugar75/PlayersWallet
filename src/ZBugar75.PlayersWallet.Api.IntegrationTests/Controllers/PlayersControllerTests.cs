@@ -44,7 +44,7 @@ namespace ZBugar75.PlayersWallet.Api.IntegrationTests.Controllers
         public async Task GetBalance_ShouldReturnBalance_WhenCalledForExistingPlayer()
         {
             var client = _factory.CreateClient();
-            var wallet = Utilities.GetSeedingWallets()[0];
+            var wallet = Utilities.GetSeedingWallets()[1];
 
             var response = await client.GetAsync($"/players/{wallet.PlayerId}/balance");
             var jsonFromResponse = await response.Content.ReadAsStringAsync();
@@ -155,7 +155,7 @@ namespace ZBugar75.PlayersWallet.Api.IntegrationTests.Controllers
                 .WithAmount(100000)
                 .Build();
 
-            var player = Utilities.GetSeedingPlayers()[0];
+            var player = Utilities.GetSeedingPlayers()[2];
 
             var response = await client.PostAsync($"/players/{player.Id}/registertransaction", ContentHelper.GetStringContent(body));
 
