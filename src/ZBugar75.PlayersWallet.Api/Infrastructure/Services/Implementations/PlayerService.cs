@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Nito.AsyncEx;
 using Zbugar75.PlayersWallet.Api.Common.Exceptions;
 using Zbugar75.PlayersWallet.Api.Domain.Entities;
@@ -16,6 +17,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
     public class PlayerService : IPlayerService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly ILogger<PlayerService> _logger;
         private readonly IPlayerRepository _players;
         private readonly IWalletRepository _wallets;
         private readonly ITransactionRepository _transactions;
@@ -23,20 +25,27 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
 
         private static AsyncReaderWriterLock padlock = new AsyncReaderWriterLock();
 
-        public PlayerService(IUnitOfWork unitOfWork)
+        public PlayerService(IUnitOfWork unitOfWork, ILogger<PlayerService> _logger)
         {
             _unitOfWork = unitOfWork;
+            this._logger = _logger;
             _players = unitOfWork.Players;
             _wallets = unitOfWork.Wallets;
             _transactions = _unitOfWork.Transactions;
             _transactionResponseCache = unitOfWork.TransactionResponseCache;
         }
 
-        public async Task<Player> CreatePlayerAsync(string username, CancellationToken cancellationToken)
+        public Task<Player> CreatePlayerAsync(string username, CancellationToken cancellationToken)
         {
+            _logger.LogDebug("{method} started for {username}.", nameof(CreatePlayerAsync), username);
             if (username is null || username == string.Empty)
                 throw new ArgumentNullException(nameof(username));
 
+            return CreatePlayerInternalAsync(username, cancellationToken);
+        }
+
+        private async Task<Player> CreatePlayerInternalAsync(string username, CancellationToken cancellationToken)
+        {
             using (await padlock.WriterLockAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (await _players.ExistsPlayerWithUsernameAsync(username, cancellationToken).ConfigureAwait(false))
@@ -52,12 +61,14 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
 
                 await _unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
 
+                _logger.LogDebug("{method} finished. Player with {playerId} id created.", nameof(CreatePlayerAsync), player.Id);
                 return player;
             }
         }
 
         public async Task<Wallet> GetBalanceAsync(Guid playerId, CancellationToken cancellationToken)
         {
+            _logger.LogDebug("{method} started for {playerId}.", nameof(GetBalanceAsync), playerId);
             using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(false))
             {
                 await EnsurePlayerExistsAsync(playerId, cancellationToken).ConfigureAwait(false);
@@ -68,12 +79,14 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
                     throw new EntityNotFoundException(
                         $"Entity not found exception. Wallet for player {playerId} not found.");
 
+                _logger.LogDebug("{method} executed for {playerId}. Balance {balance} retrieved.", nameof(GetBalanceAsync), playerId, wallet.Balance);
                 return wallet;
             }
         }
 
         public async Task<IEnumerable<Player>> GetPlayersAsync(CancellationToken cancellationToken)
         {
+            _logger.LogDebug("{method} started.", nameof(GetPlayersAsync));
             using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(false))
             {
                 return await _players.GetAllAsync(cancellationToken).ConfigureAwait(false);
@@ -82,6 +95,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
 
         public async Task<IEnumerable<Transaction>> GetTransactionsAsync(Guid playerId, CancellationToken cancellationToken)
         {
+            _logger.LogDebug("{method} started.", nameof(GetTransactionsAsync));
             using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(false))
             {
                 await EnsurePlayerExistsAsync(playerId, cancellationToken).ConfigureAwait(false);
@@ -92,11 +106,13 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
 
         public async Task<TransactionResponse> RegisterTransactionAsync(Transaction transaction, CancellationToken cancellationToken)
         {
+            _logger.LogDebug("{method} started for transaction {transactionId}.", nameof(RegisterTransactionAsync), transaction.Id);
             using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(false))
             {
                 await EnsurePlayerExistsAsync(transaction.PlayerId, cancellationToken).ConfigureAwait(false);
             }
 
+            _logger.LogTrace("{method}: Player {playerId} found.", nameof(RegisterTransactionAsync), transaction.PlayerId);
             using (await padlock.WriterLockAsync(cancellationToken).ConfigureAwait(false))
             {
                 var transactionResponse = await _transactionResponseCache
@@ -104,19 +120,27 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
                     .ConfigureAwait(false);
 
                 if (transactionResponse is not null)
+                {
+                    _logger.LogTrace("{method}: Transaction found in cache. Returning response.", nameof(RegisterTransactionAsync), transaction.PlayerId);
                     return transactionResponse;
+                }
 
                 try
                 {
+                    _logger.LogTrace("{method}: Transaction not found in cache. Returning response.", nameof(RegisterTransactionAsync), transaction.PlayerId);
                     var wallet = await _wallets
                         .GetExistingAsync(transaction.PlayerId, cancellationToken)
                         .ConfigureAwait(false);
 
-                    if (transaction.TransactionType == TransactionType.Stake && transaction.Amount > wallet.Balance)
-                        throw new LowBalanceException($"Low balance exception for the Player {transaction.PlayerId}");
 
                     if (transaction.TransactionType == TransactionType.Stake)
                     {
+                        if (transaction.Amount > wallet.Balance)
+                        {
+                            _logger.LogTrace("{method}: LowBalanceException. Transaction {transactionId} will be as rejected registered.", nameof(RegisterTransactionAsync), transaction.PlayerId);
+                            throw new LowBalanceException($"Low balance exception for the Player {transaction.PlayerId}");
+                        }
+
                         wallet.Balance -= transaction.Amount;
                     }
                     else
@@ -135,6 +159,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
                         .ConfigureAwait(false);
 
                     await _unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
+                    _logger.LogTrace("{method}: Transaction {transactionId} registered successfully. The new balance is {balance}.", nameof(RegisterTransactionAsync), transaction.PlayerId, wallet.Balance);
                 }
                 catch (Exception)
                 {
@@ -149,8 +174,10 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
                         .ConfigureAwait(false);
 
                     await _unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
+                    _logger.LogTrace("{method}: Transaction {transactionId} was not executed.", nameof(RegisterTransactionAsync), transaction.PlayerId);
                 }
 
+                _logger.LogDebug("{method} finished for transaction {transactionId}.", nameof(RegisterTransactionAsync), transaction.Id);
                 return transactionResponse;
             }
         }

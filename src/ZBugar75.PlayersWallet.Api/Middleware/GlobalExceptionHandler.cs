@@ -40,26 +40,30 @@ namespace Zbugar75.PlayersWallet.Api.Middleware
 
         private void HandleExceptionAsync(HttpContext context, Exception exception)
         {
-            _logger.LogError(exception, $"Global exception handler catched exception.");
+            if (exception is EntityNotFoundException || exception is DuplicateEntityException || exception is ArgumentNullException)
+                _logger.LogInformation("Global exception handler catched exception: {message}", exception.Message);
+            else
+                _logger.LogError(exception, "Global exception handler catched exception.");
+
             var response = context.Response;
             response.ContentType = "application/json";
             response.StatusCode = GetStatusCodeFromException(exception);
         }
 
-        private static int GetStatusCodeFromException(Exception ex)
+        private static int GetStatusCodeFromException(Exception exception)
         {
             HttpStatusCode code = HttpStatusCode.InternalServerError;
-            if (ex != null)
+            if (exception != null)
             {
-                if (ex is EntityNotFoundException)
+                if (exception is EntityNotFoundException)
                 {
                     code = HttpStatusCode.NotFound;
                 }
-                else if (ex is DuplicateEntityException)
+                else if (exception is DuplicateEntityException)
                 {
                     code = HttpStatusCode.Conflict;
                 }
-                else if (ex is ArgumentNullException)
+                else if (exception is ArgumentNullException)
                 {
                     code = HttpStatusCode.BadRequest;
                 }
