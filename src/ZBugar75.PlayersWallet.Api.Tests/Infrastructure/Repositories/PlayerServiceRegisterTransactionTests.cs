@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 using Zbugar75.PlayersWallet.Api.Domain.Entities;
 using Zbugar75.PlayersWallet.Api.Domain.Entities.Enums;
@@ -31,7 +32,7 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Infrastructure.Repositories
             _cancellationToken = CancellationToken.None;
             _playersWalletContext = DataContextHelper.GetInMemoryDataContext();
             _unitOfWorkMock = DataContextHelper.GetUnitOfWorkMock(_playersWalletContext);
-            _underTest = new PlayerService(_unitOfWorkMock);
+            _underTest = new PlayerService(_unitOfWorkMock, NullLogger<PlayerService>.Instance);
         }
 
         [Theory]
