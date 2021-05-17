@@ -6,6 +6,7 @@ using Zbugar75.PlayersWallet.Api.Dtos;
 using Zbugar75.PlayersWallet.Api.Infrastructure.DbContext;
 using Zbugar75.PlayersWallet.Api.Infrastructure.UnitOfWork;
 using Zbugar75.PlayersWallet.Api.Utils.Extensions;
+using ZBugar75.PlayersWallet.Api.Tests.Shared.Mocks;
 
 namespace ZBugar75.PlayersWallet.Api.Tests.Shared
 {
@@ -18,9 +19,9 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Shared
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString(), new InMemoryDatabaseRoot())
                 .Options);
         }
-        public static IUnitOfWork GetUnitOfWork(IPlayersWalletContext context)
+        public static IUnitOfWork GetUnitOfWorkMock(IPlayersWalletContext context)
         {
-            return new UnitOfWork(context);
+            return new UnitOfWorkMock(context);
         }
 
         public static Func<Player, Player, bool> ComparePlayersListsFunc()

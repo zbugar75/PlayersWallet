@@ -27,7 +27,7 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Infrastructure.Repositories
         {
             _cancellationToken = CancellationToken.None;
             _playersWalletContext = DataContextHelper.GetInMemoryDataContext();
-            var unitOfWork = DataContextHelper.GetUnitOfWork(_playersWalletContext);
+            var unitOfWork = DataContextHelper.GetUnitOfWorkMock(_playersWalletContext);
             _underTest = new PlayerService(unitOfWork);
         }
 

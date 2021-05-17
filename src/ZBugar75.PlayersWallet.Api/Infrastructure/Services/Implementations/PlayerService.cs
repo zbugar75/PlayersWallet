@@ -84,7 +84,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
             using (await padlock.WriterLockAsync(cancellationToken).ConfigureAwait(false))
             {
                 var transactionResponse = await _transactionResponseCache
-                    .GetAsync(transaction.PlayerId, cancellationToken)
+                    .GetAsync(transaction.Id, cancellationToken)
                     .ConfigureAwait(false);
 
                 if (transactionResponse is not null)
@@ -92,10 +92,6 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
 
                 try
                 {
-                    // Db transaction is not supported on InMemory Database
-                    // I think, this step would be correct with a db transaction
-                    // await _unitOfWork.BeginTransactionAsync(cancellationToken).ConfigureAwait(false);
-
                     var wallet = await _wallets
                         .GetExistingAsync(transaction.PlayerId, cancellationToken)
                         .ConfigureAwait(false);
@@ -123,12 +119,9 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
                         .ConfigureAwait(false);
 
                     await _unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
-                    //await _unitOfWork.CommitTransactionAsync(cancellationToken).ConfigureAwait(false);
                 }
                 catch (Exception)
                 {
-                    //await _unitOfWork.RollbackTransactionAsync(cancellationToken).ConfigureAwait(false);
-
                     transactionResponse = new TransactionResponse
                     {
                         TransactionId = transaction.Id,
