@@ -42,34 +42,12 @@ jobs:
       run: |
         New-Item -Path .\.sonar\scanner -ItemType Directory
         dotnet tool update dotnet-sonarscanner --tool-path .\.sonar\scanner
-    - name: SonarScanner for .NET 5 with pull request decoration support
-      uses: highbyte/sonarscan-dotnet@2.0
-      with:
-        # The key of the SonarQube project
-        sonarProjectKey: zbugar75_PlayersWallet
-        # The name of the SonarQube project
-        sonarProjectName:  PlayersWallet
-        # The name of the SonarQube organization in SonarCloud. For hosted SonarQube, skip this setting.
-        sonarOrganization: zbugar75
-        # Optional command arguments to dotnet build
-        dotnetBuildArguments: ./src
-        # Optional command arguments to dotnet test
-        dotnetTestArguments: ./src --logger trx --collect:"XPlat Code Coverage" -- DataCollectionRunSettings.DataCollectors.DataCollector.Configuration.Format=opencover
-        # Optional extra command arguments the the SonarScanner 'begin' command
-        sonarBeginArguments: /d:sonar.cs.opencover.reportsPaths="**/TestResults/**/coverage.opencover.xml" -d:sonar.cs.vstest.reportsPaths="**/TestResults/*.trx"
-        
-    env:
-      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    #- name: Build and analyze
-    #  env:
-    #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-    #    SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-    #  shell: powershell
-    #  run: |
-    #    .\.sonar\scanner\dotnet-sonarscanner begin /k:"zbugar75_PlayersWallet" /o:"zbugar75" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-    #    dotnet restore src/ZBugar75.PlayersWallet.sln
-    #    dotnet build --no-restore src/ZBugar75.PlayersWallet.sln
-    #    dotnet test --no-build --verbosity  normal --logger trx --collect:"XPlat Code Coverage" src/ZBugar75.PlayersWallet.sln
-    #    .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
+    - name: Build and analyze
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      shell: powershell
+      run: |
+        .\.sonar\scanner\dotnet-sonarscanner begin /k:"zbugar75_PlayersWallet" /o:"zbugar75" /d:sonar.login="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
+        dotnet build src/ZBugar75.PlayersWallet.sln
+        .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.login="${{ secrets.SONAR_TOKEN }}"
