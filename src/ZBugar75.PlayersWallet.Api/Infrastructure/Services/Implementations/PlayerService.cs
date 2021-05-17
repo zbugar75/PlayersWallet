@@ -37,49 +37,65 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
             if (username is null || username == string.Empty)
                 throw new ArgumentNullException(nameof(username));
 
-            if (await _players.ExistsPlayerWithUsernameAsync(username, cancellationToken).ConfigureAwait(false))
-                throw new DuplicateEntityException($"Duplicate exception. Username '{username}' already exists.");
+            using (await padlock.WriterLockAsync(cancellationToken).ConfigureAwait(false))
+            {
+                if (await _players.ExistsPlayerWithUsernameAsync(username, cancellationToken).ConfigureAwait(false))
+                    throw new DuplicateEntityException($"Duplicate exception. Username '{username}' already exists.");
 
-            var player = await _players
-                .AddAsync(new Player { Username = username }, cancellationToken)
-                .ConfigureAwait(false);
+                var player = await _players
+                    .AddAsync(new Player { Username = username }, cancellationToken)
+                    .ConfigureAwait(false);
 
-            await _wallets
-                .AddAsync(new Wallet { PlayerId = player.Id, Balance = 0 }, cancellationToken)
-                .ConfigureAwait(false);
+                await _wallets
+                    .AddAsync(new Wallet { PlayerId = player.Id, Balance = 0 }, cancellationToken)
+                    .ConfigureAwait(false);
 
-            await _unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
+                await _unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
 
-            return player;
+                return player;
+            }
         }
 
         public async Task<Wallet> GetBalanceAsync(Guid playerId, CancellationToken cancellationToken)
         {
-            await EnsurePlayerExistsAsync(playerId, cancellationToken).ConfigureAwait(false);
+            using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(false))
+            {
+                await EnsurePlayerExistsAsync(playerId, cancellationToken).ConfigureAwait(false);
 
-            var wallet = await _wallets.GetExistingAsync(playerId, cancellationToken).ConfigureAwait(false);
+                var wallet = await _wallets.GetExistingAsync(playerId, cancellationToken).ConfigureAwait(false);
 
-            if (wallet == null)
-                throw new EntityNotFoundException($"Entity not found exception. Wallet for player {playerId} not found.");
+                if (wallet == null)
+                    throw new EntityNotFoundException(
+                        $"Entity not found exception. Wallet for player {playerId} not found.");
 
-            return wallet;
+                return wallet;
+            }
         }
 
         public async Task<IEnumerable<Player>> GetPlayersAsync(CancellationToken cancellationToken)
         {
-            return await _players.GetAllAsync(cancellationToken).ConfigureAwait(false);
+            using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(false))
+            {
+                return await _players.GetAllAsync(cancellationToken).ConfigureAwait(false);
+            }
         }
 
         public async Task<IEnumerable<Transaction>> GetTransactionsAsync(Guid playerId, CancellationToken cancellationToken)
         {
-            await EnsurePlayerExistsAsync(playerId, cancellationToken).ConfigureAwait(false);
+            using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(false))
+            {
+                await EnsurePlayerExistsAsync(playerId, cancellationToken).ConfigureAwait(false);
 
-            return await _transactions.GetAllForPlayerAsync(playerId, cancellationToken).ConfigureAwait(false);
+                return await _transactions.GetAllForPlayerAsync(playerId, cancellationToken).ConfigureAwait(false);
+            }
         }
 
         public async Task<TransactionResponse> RegisterTransactionAsync(Transaction transaction, CancellationToken cancellationToken)
         {
-            await EnsurePlayerExistsAsync(transaction.PlayerId, cancellationToken).ConfigureAwait(false);
+            using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(false))
+            {
+                await EnsurePlayerExistsAsync(transaction.PlayerId, cancellationToken).ConfigureAwait(false);
+            }
 
             using (await padlock.WriterLockAsync(cancellationToken).ConfigureAwait(false))
             {
