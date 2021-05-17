@@ -4,6 +4,9 @@ using Microsoft.EntityFrameworkCore.Storage;
 using Zbugar75.PlayersWallet.Api.Domain.Entities;
 using Zbugar75.PlayersWallet.Api.Dtos;
 using Zbugar75.PlayersWallet.Api.Infrastructure.DbContext;
+using Zbugar75.PlayersWallet.Api.Infrastructure.UnitOfWork;
+using Zbugar75.PlayersWallet.Api.Utils.Extensions;
+using ZBugar75.PlayersWallet.Api.Tests.Shared.Mocks;
 
 namespace ZBugar75.PlayersWallet.Api.Tests.Shared
 {
@@ -16,6 +19,10 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Shared
                 .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString(), new InMemoryDatabaseRoot())
                 .Options);
         }
+        public static IUnitOfWork GetUnitOfWorkMock(IPlayersWalletContext context)
+        {
+            return new UnitOfWorkMock(context);
+        }
 
         public static Func<Player, Player, bool> ComparePlayersListsFunc()
         {
@@ -25,6 +32,16 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Shared
         public static Func<PlayerDto, Player, bool> ComparePlayersDtoListsFunc()
         {
             return (c1, c2) => c1.Id == c2.Id && c1.Username == c2.Username;
+        }
+
+        public static Func<TransactionDto, Transaction, bool> CompareTransactionDtoToTransaction()
+        {
+            return (c1, c2) => c1.Id == c2.Id && c1.Amount == c2.Amount && c1.TransactionType == c2.TransactionType.ToTransactionTypeDto();
+        }
+
+        public static Func<TransactionResponse, TransactionResponse, bool> CompareTransactionResponseListsFunc()
+        {
+            return (c1, c2) => c1.TransactionId == c2.TransactionId && c1.ResponseStatusCode == c2.ResponseStatusCode;
         }
     }
 }

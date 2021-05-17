@@ -3,9 +3,9 @@ using Zbugar75.PlayersWallet.Api.Infrastructure.DbContext;
 
 namespace Zbugar75.PlayersWallet.Api.Infrastructure.Repositories.Implementations
 {
-    public class WalletRepository : Repository<Wallet>, IWalletRepository
+    public class TransactionResponseCacheRepository : Repository<TransactionResponse>, ITransactionResponseCacheRepository
     {
-        public WalletRepository(IPlayersWalletContext context) : base(context)
+        public TransactionResponseCacheRepository(IPlayersWalletContext context) : base(context)
         {
         }
     }

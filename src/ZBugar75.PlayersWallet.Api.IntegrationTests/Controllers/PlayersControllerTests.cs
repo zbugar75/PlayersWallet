@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using System.Globalization;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;
@@ -7,8 +7,10 @@ using Newtonsoft.Json;
 using Xunit;
 using Zbugar75.PlayersWallet.Api;
 using Zbugar75.PlayersWallet.Api.Dtos;
+using Zbugar75.PlayersWallet.Api.Dtos.Enums;
 using ZBugar75.PlayersWallet.Api.IntegrationTests.Helper;
 using ZBugar75.PlayersWallet.Api.Tests.Shared;
+using ZBugar75.PlayersWallet.Api.Tests.Shared.Builder;
 using ZBugar75.PlayersWallet.Api.Tests.Shared.Extensions;
 
 namespace ZBugar75.PlayersWallet.Api.IntegrationTests.Controllers
@@ -42,14 +44,16 @@ namespace ZBugar75.PlayersWallet.Api.IntegrationTests.Controllers
         public async Task GetBalance_ShouldReturnBalance_WhenCalledForExistingPlayer()
         {
             var client = _factory.CreateClient();
-            var wallet = Utilities.GetSeedingWallets()[0];
+            var wallet = Utilities.GetSeedingWallets()[1];
 
             var response = await client.GetAsync($"/players/{wallet.PlayerId}/balance");
-            var balance = await response.Content.ReadAsStringAsync();
+            var jsonFromResponse = await response.Content.ReadAsStringAsync();
+            var playerBalanceResponse = JsonConvert.DeserializeObject<PlayerBalanceDto>(jsonFromResponse);
 
             response.EnsureSuccessStatusCode();
 
-            balance.Should().Be(wallet.Balance.ToString(CultureInfo.InvariantCulture));
+            playerBalanceResponse.Balance.Should().Be(wallet.Balance);
+            playerBalanceResponse.PlayerId.Should().Be(wallet.PlayerId);
         }
 
         [Fact]
@@ -100,6 +104,78 @@ namespace ZBugar75.PlayersWallet.Api.IntegrationTests.Controllers
             response.EnsureSuccessStatusCode();
 
             playerResponse.Username.Should().Be(username);
+        }
+
+        [Fact]
+        public async Task GetTransactions_ShouldReturnStatus404NotFound_WhenCalledWithNotExistingPlayer()
+        {
+            var client = _factory.CreateClient();
+
+            var response = await client.GetAsync($"/players/{999.ToGuid()}/transactions");
+
+            response.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+
+        [Fact]
+        public async Task GetTransactions_ShouldReturnSeededTransactions_WhenCalledWithExistingPlayer()
+        {
+            var client = _factory.CreateClient();
+
+            var player = Utilities.GetSeedingPlayers()[0];
+
+            var response = await client.GetAsync($"/players/{player.Id}/transactions");
+            var jsonFromResponse = await response.Content.ReadAsStringAsync();
+            var transactionsResponse = JsonConvert.DeserializeObject<IEnumerable<TransactionDto>>(jsonFromResponse);
+
+            response.EnsureSuccessStatusCode();
+
+            transactionsResponse.Should().Equal(
+                Utilities.GetSeedingTransactions().Where(t => t.PlayerId == player.Id),
+                DataContextHelper.CompareTransactionDtoToTransaction());
+        }
+
+        [Fact]
+        public async Task RegisterTransaction_ShouldReturn404NotFound_WhenPlayerNotExists()
+        {
+            var client = _factory.CreateClient();
+            var body = new RegisterTransactionRequestBuilder().Build();
+            var playerId = 999.ToGuid();
+
+            var response = await client.PostAsync($"/players/{playerId}/registertransaction", ContentHelper.GetStringContent(body));
+
+            response.StatusCode.Should().Be(StatusCodes.Status404NotFound);
+        }
+
+        [Fact]
+        public async Task RegisterTransaction_ShouldReturn403Forbidden_WhenPlayerBalanceIsLow()
+        {
+            var client = _factory.CreateClient();
+            var body = new RegisterTransactionRequestBuilder()
+                .WithTransactionType(TransactionTypeDto.Stake)
+                .WithAmount(100000)
+                .Build();
+
+            var player = Utilities.GetSeedingPlayers()[2];
+
+            var response = await client.PostAsync($"/players/{player.Id}/registertransaction", ContentHelper.GetStringContent(body));
+
+            response.StatusCode.Should().Be(StatusCodes.Status403Forbidden);
+        }
+
+        [Fact]
+        public async Task RegisterTransaction_ShouldReturn202Accepted_WhenTransactionExecuted()
+        {
+            var client = _factory.CreateClient();
+            var body = new RegisterTransactionRequestBuilder()
+                .WithTransactionType(TransactionTypeDto.Win)
+                .WithAmount(100000)
+                .Build();
+
+            var player = Utilities.GetSeedingPlayers()[0];
+
+            var response = await client.PostAsync($"/players/{player.Id}/registertransaction", ContentHelper.GetStringContent(body));
+
+            response.StatusCode.Should().Be(StatusCodes.Status202Accepted);
         }
     }
 }

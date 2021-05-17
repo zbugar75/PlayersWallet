@@ -51,6 +51,7 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Shared.Builder
                 Wallet = wallet
             };
         }
+
         public async Task<Player> CreateAsync(IPlayersWalletContext dbContext, CancellationToken cancellationToken)
         {
             var entity = Build();

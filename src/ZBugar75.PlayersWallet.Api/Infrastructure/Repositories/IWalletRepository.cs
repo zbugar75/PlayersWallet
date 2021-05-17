@@ -1,11 +1,8 @@
-using System;
-using System.Threading;
-using System.Threading.Tasks;
+using Zbugar75.PlayersWallet.Api.Domain.Entities;
 
 namespace Zbugar75.PlayersWallet.Api.Infrastructure.Repositories
 {
-    public interface IWalletRepository
+    public interface IWalletRepository : IRepository<Wallet>
     {
-        Task<decimal> GetBalanceAsync(Guid playerId, CancellationToken cancellationToken);
     }
 }

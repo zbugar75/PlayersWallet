@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
+using Zbugar75.PlayersWallet.Api.Common.Exceptions;
 using Zbugar75.PlayersWallet.Api.Exceptions;
 using Zbugar75.PlayersWallet.Api.Utils.Extensions;
 
@@ -54,7 +55,7 @@ namespace Zbugar75.PlayersWallet.Api.Middleware
                 {
                     code = HttpStatusCode.NotFound;
                 }
-                else if (ex is DuplicateUsernameException)
+                else if (ex is DuplicateEntityException)
                 {
                     code = HttpStatusCode.Conflict;
                 }

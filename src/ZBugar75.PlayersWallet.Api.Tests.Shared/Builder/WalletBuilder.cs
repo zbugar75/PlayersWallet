@@ -1,5 +1,8 @@
 ﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
 using Zbugar75.PlayersWallet.Api.Domain.Entities;
+using Zbugar75.PlayersWallet.Api.Infrastructure.DbContext;
 
 namespace ZBugar75.PlayersWallet.Api.Tests.Shared.Builder
 {
@@ -33,6 +36,16 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Shared.Builder
                 PlayerId = _playerId,
                 Balance = _balance
             };
+        }
+
+        public async Task<Wallet> CreateAsync(IPlayersWalletContext dbContext, CancellationToken cancellationToken)
+        {
+            var entity = Build();
+
+            await dbContext.Wallets.AddAsync(entity, cancellationToken).ConfigureAwait(false);
+            await dbContext.SaveChangesAsync(cancellationToken).ConfigureAwait(false);
+
+            return entity;
         }
     }
 }

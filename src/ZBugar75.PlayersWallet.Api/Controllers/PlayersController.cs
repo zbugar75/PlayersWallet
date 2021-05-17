@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Zbugar75.PlayersWallet.Api.Dtos;
-using Zbugar75.PlayersWallet.Api.Infrastructure.Repositories;
+using Zbugar75.PlayersWallet.Api.Infrastructure.Services;
+using Zbugar75.PlayersWallet.Api.Utils.Extensions;
 
 namespace Zbugar75.PlayersWallet.Api.Controllers
 {
@@ -14,39 +15,56 @@ namespace Zbugar75.PlayersWallet.Api.Controllers
     [Route("[controller]")]
     public class PlayersController : ControllerBase
     {
-        private readonly IPlayerRepository _playerRepository;
-        private readonly IWalletRepository _walletRepository;
+        private readonly IPlayerService _playerService;
 
-        public PlayersController(IPlayerRepository playerRepository, IWalletRepository walletRepository)
+        public PlayersController(IPlayerService playerService)
         {
-            _playerRepository = playerRepository;
-            _walletRepository = walletRepository;
+            _playerService = playerService;
         }
 
         [HttpGet]
         [ProducesResponseType(typeof(IEnumerable<PlayerDto>), StatusCodes.Status200OK)]
         public async Task<IEnumerable<PlayerDto>> GetPlayers(CancellationToken cancellationToken)
         {
-            var players = await _playerRepository.GetPlayersAsync(cancellationToken).ConfigureAwait(false);
+            var players = await _playerService.GetPlayersAsync(cancellationToken).ConfigureAwait(false);
             return players.Select(PlayerDto.Create);
         }
 
         [HttpGet("{id}/balance")]
-        [ProducesResponseType(typeof(IEnumerable<PlayerDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PlayerBalanceDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status404NotFound)]
-        public async Task<decimal> GetBalance(Guid id, CancellationToken cancellationToken)
+        public async Task<PlayerBalanceDto> GetBalance(Guid id, CancellationToken cancellationToken)
         {
-            var balance = await _walletRepository.GetBalanceAsync(id, cancellationToken).ConfigureAwait(false);
-            return balance;
+            var wallet = await _playerService.GetBalanceAsync(id, cancellationToken).ConfigureAwait(false);
+            return PlayerBalanceDto.Create(wallet);
+        }
+
+        [HttpGet("{id}/transactions")]
+        [ProducesResponseType(typeof(IEnumerable<TransactionDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status404NotFound)]
+        public async Task<IEnumerable<TransactionDto>> Get(Guid id, CancellationToken cancellationToken)
+        {
+            var transactions = await _playerService.GetTransactionsAsync(id, cancellationToken).ConfigureAwait(false);
+            return transactions.Select(TransactionDto.Create);
         }
 
         [HttpPost]
-        [ProducesResponseType(typeof(IEnumerable<PlayerDto>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(PlayerDto), StatusCodes.Status200OK)]
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status409Conflict)]
         public async Task<PlayerDto> CreatePlayer([FromBody] CreatePlayerRequest request, CancellationToken cancellationToken)
         {
-            var player = await _playerRepository.CreatePlayerAsync(request.Username, cancellationToken).ConfigureAwait(false);
+            var player = await _playerService.CreatePlayerAsync(request.Username, cancellationToken).ConfigureAwait(false);
             return PlayerDto.Create(player);
+        }
+
+        [HttpPost("{id}/registertransaction")]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status202Accepted)]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status403Forbidden)]
+        [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status404NotFound)]
+        public async Task<IActionResult> RegisterTransaction(Guid id, [FromBody] RegisterTransactionRequest request, CancellationToken cancellationToken)
+        {
+            var transactionResponse = await _playerService.RegisterTransactionAsync(request.ToTransaction(id), cancellationToken).ConfigureAwait(false);
+            return StatusCode(transactionResponse.ResponseStatusCode);
         }
     }
 }

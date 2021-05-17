@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using Zbugar75.PlayersWallet.Api.Infrastructure.Repositories;
-using Zbugar75.PlayersWallet.Api.Infrastructure.Repositories.Implementations;
+using Zbugar75.PlayersWallet.Api.Infrastructure.Services;
+using Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations;
+using Zbugar75.PlayersWallet.Api.Infrastructure.UnitOfWork;
 
 namespace Zbugar75.PlayersWallet.Api.Utils
 {
@@ -10,8 +11,8 @@ namespace Zbugar75.PlayersWallet.Api.Utils
             this IServiceCollection services)
         {
             services
-                .AddScoped<IPlayerRepository, PlayerRepository>()
-                .AddScoped<IWalletRepository, WalletRepository>();
+                .AddScoped<IUnitOfWork, UnitOfWork>()
+                .AddScoped<IPlayerService, PlayerService>();
 
             return services;
         }

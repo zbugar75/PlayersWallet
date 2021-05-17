@@ -5,27 +5,30 @@ using System.Threading;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Xunit;
+using Zbugar75.PlayersWallet.Api.Common.Exceptions;
 using Zbugar75.PlayersWallet.Api.Domain.Entities;
 using Zbugar75.PlayersWallet.Api.Exceptions;
 using Zbugar75.PlayersWallet.Api.Infrastructure.DbContext;
-using Zbugar75.PlayersWallet.Api.Infrastructure.Repositories;
-using Zbugar75.PlayersWallet.Api.Infrastructure.Repositories.Implementations;
+using Zbugar75.PlayersWallet.Api.Infrastructure.Services;
+using Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations;
 using ZBugar75.PlayersWallet.Api.Tests.Shared;
 using ZBugar75.PlayersWallet.Api.Tests.Shared.Builder;
+using ZBugar75.PlayersWallet.Api.Tests.Shared.Extensions;
 
 namespace ZBugar75.PlayersWallet.Api.Tests.Infrastructure.Repositories
 {
-    public class PlayerRepositoryTests
+    public class PlayerServiceTests
     {
         private readonly CancellationToken _cancellationToken;
+        private readonly IPlayerService _underTest;
         private readonly IPlayersWalletContext _playersWalletContext;
-        private readonly IPlayerRepository _underTest;
 
-        public PlayerRepositoryTests()
+        public PlayerServiceTests()
         {
             _cancellationToken = CancellationToken.None;
             _playersWalletContext = DataContextHelper.GetInMemoryDataContext();
-            _underTest = new PlayerRepository(_playersWalletContext);
+            var unitOfWork = DataContextHelper.GetUnitOfWorkMock(_playersWalletContext);
+            _underTest = new PlayerService(unitOfWork);
         }
 
         [Fact]
@@ -52,9 +55,7 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Infrastructure.Repositories
         [Fact]
         public async Task CreatePlayerAsync_ShouldThrowArgumentNullException_WhenCalledWithNull()
         {
-            string username = null;
-
-            Func<Task> act = async () => { await _underTest.CreatePlayerAsync(username, _cancellationToken); };
+            Func<Task> act = async () => { await _underTest.CreatePlayerAsync(null, _cancellationToken); };
 
             await act.Should().ThrowAsync<ArgumentNullException>();
         }
@@ -99,7 +100,73 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Infrastructure.Repositories
             await _underTest.CreatePlayerAsync(username, _cancellationToken);
 
             Func<Task> act = async () => { await _underTest.CreatePlayerAsync(username, _cancellationToken); };
-            await act.Should().ThrowAsync<DuplicateUsernameException>();
+            await act.Should().ThrowAsync<DuplicateEntityException>();
+        }
+
+        [Fact]
+        public async Task GetBalanceAsync_ShouldThrowEntityNotFoundException_WhenPlayerNotExists()
+        {
+            Func<Task> act = async () => { await _underTest.GetBalanceAsync(1.ToGuid(), _cancellationToken); };
+            await act.Should().ThrowAsync<EntityNotFoundException>();
+        }
+
+        [Fact]
+        public async Task GetBalanceAsync_ShouldReturnBalance_WhenCalledForExistingPlayer()
+        {
+            var playerId = 1.ToGuid();
+            var balance = 1234.56M;
+
+            _ = await new PlayerBuilder()
+                .WithId(playerId)
+                .WithBalance(balance)
+                .CreateAsync(_playersWalletContext, _cancellationToken);
+
+            var result = await _underTest.GetBalanceAsync(playerId, _cancellationToken);
+
+            result.Balance.Should().Be(balance);
+        }
+
+        [Fact]
+        public async Task GetTransactionsAsync_ShouldThrowEntityNotFoundException_WhenCalledNotExistingPlayer()
+        {
+            var playerId = 999.ToGuid();
+
+            Func<Task> act = async () => { await _underTest.GetTransactionsAsync(playerId, _cancellationToken); };
+
+            await act.Should().ThrowAsync<EntityNotFoundException>();
+        }
+
+        [Fact]
+        public async Task GetTransactionsAsync_ShouldReturnAnEmptyArray_WhenPlayerExistsWithoutTransaction()
+        {
+            var playerId = 1.ToGuid();
+
+            _ = await new PlayerBuilder()
+                .WithId(playerId)
+                .CreateAsync(_playersWalletContext, _cancellationToken);
+
+            var result = await _underTest.GetTransactionsAsync(playerId, _cancellationToken);
+
+            result.Count().Should().Be(0);
+        }
+
+        [Fact]
+        public async Task GetTransactionsAsync_ShouldReturnAnArrayOfTransactions_WhenPlayerExists()
+        {
+            var playerId = 1.ToGuid();
+
+            _ = await new PlayerBuilder()
+                .WithId(playerId)
+                .CreateAsync(_playersWalletContext, _cancellationToken);
+
+            var transaction = await new TransactionBuilder()
+                .WithPalyerId(playerId)
+                .CreateAsync(_playersWalletContext, _cancellationToken);
+
+            var result = await _underTest.GetTransactionsAsync(playerId, _cancellationToken);
+
+            result.Count().Should().Be(1);
+            result.Select(p => p.Id).Should().Equal(transaction.Id);
         }
     }
 }
