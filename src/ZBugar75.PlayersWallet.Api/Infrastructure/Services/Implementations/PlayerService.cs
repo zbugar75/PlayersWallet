@@ -35,12 +35,17 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
             _transactionResponseCache = unitOfWork.TransactionResponseCache;
         }
 
-        public async Task<Player> CreatePlayerAsync(string username, CancellationToken cancellationToken)
+        public Task<Player> CreatePlayerAsync(string username, CancellationToken cancellationToken)
         {
             _logger.LogDebug("{method} started for {username}.", nameof(CreatePlayerAsync), username);
             if (username is null || username == string.Empty)
                 throw new ArgumentNullException(nameof(username));
 
+            return CreatePlayerInternalAsync(username, cancellationToken);
+        }
+
+        private async Task<Player> CreatePlayerInternalAsync(string username, CancellationToken cancellationToken)
+        {
             using (await padlock.WriterLockAsync(cancellationToken).ConfigureAwait(false))
             {
                 if (await _players.ExistsPlayerWithUsernameAsync(username, cancellationToken).ConfigureAwait(false))
