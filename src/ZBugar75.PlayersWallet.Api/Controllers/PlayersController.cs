@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Zbugar75.PlayersWallet.Api.Domain.Entities;
 using Zbugar75.PlayersWallet.Api.Dtos;
 using Zbugar75.PlayersWallet.Api.Infrastructure.Services;
 using Zbugar75.PlayersWallet.Api.Utils.Extensions;
@@ -16,10 +17,12 @@ namespace Zbugar75.PlayersWallet.Api.Controllers
     public class PlayersController : ControllerBase
     {
         private readonly IPlayerService _playerService;
+        private readonly ISimpleMemoryCache<TransactionResponse> _transactionResponseMemoryCache;
 
-        public PlayersController(IPlayerService playerService)
+        public PlayersController(IPlayerService playerService, ISimpleMemoryCache<TransactionResponse> transactionResponseMemoryCache)
         {
             _playerService = playerService;
+            _transactionResponseMemoryCache = transactionResponseMemoryCache;
         }
 
         [HttpGet]
@@ -63,7 +66,10 @@ namespace Zbugar75.PlayersWallet.Api.Controllers
         [ProducesResponseType(typeof(EmptyResult), StatusCodes.Status404NotFound)]
         public async Task<IActionResult> RegisterTransaction(Guid id, [FromBody] RegisterTransactionRequest request, CancellationToken cancellationToken)
         {
-            var transactionResponse = await _playerService.RegisterTransactionAsync(request.ToTransaction(id), cancellationToken).ConfigureAwait(false);
+            var transactionResponse = await _transactionResponseMemoryCache.GetOrCreateAsync(
+                request.Id, () => _playerService.RegisterTransactionAsync(request.ToTransaction(id), cancellationToken))
+                .ConfigureAwait(false);
+
             return StatusCode(transactionResponse.ResponseStatusCode);
         }
     }

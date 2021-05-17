@@ -26,7 +26,7 @@ namespace Zbugar75.PlayersWallet.Api
                 options => options.UseInMemoryDatabase(databaseName: "InMemoryDb"));
 
             services
-                .RegisterRepositories()
+                .RegisterRepositories(Configuration)
                 .AddControllers();
 
             services.AddSwaggerGen(c =>
