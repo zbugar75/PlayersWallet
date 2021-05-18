@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Zbugar75.PlayersWallet.Api.Exceptions;
+using Zbugar75.PlayersWallet.Api.Common.Exceptions;
 using Zbugar75.PlayersWallet.Api.Infrastructure.DbContext;
 
 namespace Zbugar75.PlayersWallet.Api.Infrastructure.Repositories.Implementations

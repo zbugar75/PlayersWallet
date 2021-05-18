@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 using Zbugar75.PlayersWallet.Api.Common.Exceptions;
 using Zbugar75.PlayersWallet.Api.Domain.Entities;
-using Zbugar75.PlayersWallet.Api.Exceptions;
 using Zbugar75.PlayersWallet.Api.Infrastructure.DbContext;
 using Zbugar75.PlayersWallet.Api.Infrastructure.Services;
 using Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations;
