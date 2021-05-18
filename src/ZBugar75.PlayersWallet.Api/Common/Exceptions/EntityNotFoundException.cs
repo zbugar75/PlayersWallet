@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Runtime.Serialization;
 
-namespace Zbugar75.PlayersWallet.Api.Exceptions
+namespace Zbugar75.PlayersWallet.Api.Common.Exceptions
 {
     [Serializable]
     public class EntityNotFoundException : Exception

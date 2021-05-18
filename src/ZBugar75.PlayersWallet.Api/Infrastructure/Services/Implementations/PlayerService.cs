@@ -8,7 +8,6 @@ using Nito.AsyncEx;
 using Zbugar75.PlayersWallet.Api.Common.Exceptions;
 using Zbugar75.PlayersWallet.Api.Domain.Entities;
 using Zbugar75.PlayersWallet.Api.Domain.Entities.Enums;
-using Zbugar75.PlayersWallet.Api.Exceptions;
 using Zbugar75.PlayersWallet.Api.Infrastructure.Repositories;
 using Zbugar75.PlayersWallet.Api.Infrastructure.UnitOfWork;
 
