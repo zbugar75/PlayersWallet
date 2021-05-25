@@ -1,3 +1,4 @@
+using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -27,7 +28,8 @@ namespace Zbugar75.PlayersWallet.Api
 
             services
                 .RegisterRepositories(Configuration)
-                .AddControllers();
+                .AddControllers()
+                .AddJsonOptions(opts => { opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); }); ;
 
             services.AddSwaggerGen(c =>
             {
