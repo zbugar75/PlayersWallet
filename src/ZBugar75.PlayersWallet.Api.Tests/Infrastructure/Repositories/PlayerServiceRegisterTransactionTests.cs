@@ -80,12 +80,12 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Infrastructure.Repositories
                 .WithBalance(oldbalance)
                 .CreateAsync(_playersWalletContext, _cancellationToken);
 
-            var transaction = await new TransactionBuilder()
+            var transaction = new TransactionBuilder()
                 .WithId(transactionId)
                 .WithPalyerId(playerId)
                 .WithAmount(amount)
                 .WithTransactionType(transactionType)
-                .CreateAsync(_playersWalletContext, _cancellationToken);
+                .Build();
 
             var result = await _underTest.RegisterTransactionAsync(transaction, _cancellationToken);
 
@@ -93,7 +93,10 @@ namespace ZBugar75.PlayersWallet.Api.Tests.Infrastructure.Repositories
             _playersWalletContext.Wallets.Select(w => w.Balance).Should().Equal(newbalance);
             _playersWalletContext.TransactionResponseCache
                 .Where(tr => tr.TransactionId == transactionId && tr.ResponseStatusCode == StatusCodes.Status202Accepted)
-                .Should().NotBeNull();
+                .Count().Should().Be(1);
+            _playersWalletContext.Transactions
+                .Where(tr => tr.Id == transactionId && tr.PlayerId == playerId)
+                .Count().Should().Be(1);
         }
 
         [Theory]

@@ -45,7 +45,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
 
         private async Task<Player> CreatePlayerInternalAsync(string username, CancellationToken cancellationToken)
         {
-            using (await padlock.WriterLockAsync(cancellationToken).ConfigureAwait(false))
+            using (await padlock.WriterLockAsync(cancellationToken).ConfigureAwait(true))
             {
                 if (await _players.ExistsPlayerWithUsernameAsync(username, cancellationToken).ConfigureAwait(false))
                     throw new DuplicateEntityException($"Duplicate exception. Username '{username}' already exists.");
@@ -68,7 +68,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
         public async Task<Wallet> GetBalanceAsync(Guid playerId, CancellationToken cancellationToken)
         {
             _logger.LogDebug("{method} started for {playerId}.", nameof(GetBalanceAsync), playerId);
-            using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(false))
+            using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(true))
             {
                 await EnsurePlayerExistsAsync(playerId, cancellationToken).ConfigureAwait(false);
 
@@ -86,7 +86,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
         public async Task<IEnumerable<Player>> GetPlayersAsync(CancellationToken cancellationToken)
         {
             _logger.LogDebug("{method} started.", nameof(GetPlayersAsync));
-            using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(false))
+            using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(true))
             {
                 return await _players.GetAllAsync(cancellationToken).ConfigureAwait(false);
             }
@@ -95,7 +95,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
         public async Task<IEnumerable<Transaction>> GetTransactionsAsync(Guid playerId, CancellationToken cancellationToken)
         {
             _logger.LogDebug("{method} started.", nameof(GetTransactionsAsync));
-            using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(false))
+            using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(true))
             {
                 await EnsurePlayerExistsAsync(playerId, cancellationToken).ConfigureAwait(false);
 
@@ -106,13 +106,13 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
         public async Task<TransactionResponse> RegisterTransactionAsync(Transaction transaction, CancellationToken cancellationToken)
         {
             _logger.LogDebug("{method} started for transaction {transactionId}.", nameof(RegisterTransactionAsync), transaction.Id);
-            using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(false))
+            using (await padlock.ReaderLockAsync(cancellationToken).ConfigureAwait(true))
             {
                 await EnsurePlayerExistsAsync(transaction.PlayerId, cancellationToken).ConfigureAwait(false);
             }
 
             _logger.LogTrace("{method}: Player {playerId} found.", nameof(RegisterTransactionAsync), transaction.PlayerId);
-            using (await padlock.WriterLockAsync(cancellationToken).ConfigureAwait(false))
+            using (await padlock.WriterLockAsync(cancellationToken).ConfigureAwait(true))
             {
                 var transactionResponse = await _transactionResponseCache
                     .GetAsync(transaction.Id, cancellationToken)
@@ -156,6 +156,8 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
                     await _transactionResponseCache
                         .AddAsync(transactionResponse, cancellationToken)
                         .ConfigureAwait(false);
+
+                    await _transactions.AddAsync(transaction, cancellationToken).ConfigureAwait(false);
 
                     await _unitOfWork.CommitAsync(cancellationToken).ConfigureAwait(false);
                     _logger.LogTrace("{method}: Transaction {transactionId} registered successfully. The new balance is {balance}.", nameof(RegisterTransactionAsync), transaction.PlayerId, wallet.Balance);
