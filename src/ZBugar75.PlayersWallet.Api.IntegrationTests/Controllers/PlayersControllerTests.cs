@@ -121,7 +121,7 @@ namespace ZBugar75.PlayersWallet.Api.IntegrationTests.Controllers
         {
             var client = _factory.CreateClient();
 
-            var player = Utilities.GetSeedingPlayers()[0];
+            var player = Utilities.GetSeedingPlayers()[1];
 
             var response = await client.GetAsync($"/players/{player.Id}/transactions");
             var jsonFromResponse = await response.Content.ReadAsStringAsync();
