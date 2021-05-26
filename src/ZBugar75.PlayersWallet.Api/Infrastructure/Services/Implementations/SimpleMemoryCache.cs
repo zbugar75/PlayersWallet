@@ -25,7 +25,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
             _logger.LogTrace("Try to get entry from the memory cache.");
             if (_cache.TryGetValue(key, out TItem cacheEntry))
             {
-                _logger.LogTrace("Entry found. Returning entry from the cache.");
+                _logger.LogTrace("Entry found in memory cache: {cacheEntry}", cacheEntry);
                 return cacheEntry;
             }
 
@@ -39,6 +39,7 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
                 .SetAbsoluteExpiration(_simpleMemoryCacheConfiguration.AbsoluteExpiration);
 
             _cache.Set(key, cacheEntry, cacheEntryOptions);
+            _logger.LogTrace("Entry registered in memory cache: {cacheEntry}", cacheEntry);
 
             return cacheEntry;
         }

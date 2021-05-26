@@ -120,13 +120,13 @@ namespace Zbugar75.PlayersWallet.Api.Infrastructure.Services.Implementations
 
                 if (transactionResponse is not null)
                 {
-                    _logger.LogTrace("{method}: Transaction found in cache. Returning response.", nameof(RegisterTransactionAsync), transaction.PlayerId);
+                    _logger.LogTrace("{method}: Transaction found in persistent cache. Returning response. {transactionResponse}", nameof(RegisterTransactionAsync), transactionResponse);
                     return transactionResponse;
                 }
 
                 try
                 {
-                    _logger.LogTrace("{method}: Transaction not found in cache. Returning response.", nameof(RegisterTransactionAsync), transaction.PlayerId);
+                    _logger.LogTrace("{method}: Transaction not found in cache. Returning response.", nameof(RegisterTransactionAsync));
                     var wallet = await _wallets
                         .GetExistingAsync(transaction.PlayerId, cancellationToken)
                         .ConfigureAwait(false);
