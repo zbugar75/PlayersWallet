@@ -29,7 +29,7 @@ namespace Zbugar75.PlayersWallet.Api
             services
                 .RegisterRepositories(Configuration)
                 .AddControllers()
-                .AddJsonOptions(opts => { opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); }); ;
+                .AddJsonOptions(opts => { opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()); });
 
             services.AddSwaggerGen(c =>
             {
